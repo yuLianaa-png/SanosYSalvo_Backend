@@ -1,0 +1,42 @@
+services:
+  sys-db:
+    image: postgres:15 #imagen que se descarga ya construida, como molde
+    container_name: sys-db
+    environment:
+      POSTGRES_DB: sys_db
+      POSTGRES_USER: user_sanos
+      POSTGRES_PASSWORD: admin_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data # <--- ESTA LÍNEA ES LA MAGIA DE QUE NO SE BORREN LOS DATO SDJFDJFHSJKHDN
+  
+  # Microservicio de Registro
+  pet-service:
+    build: ./pet-service
+    container_name: sanos-salvos-petserv
+    ports:
+      - "8081:8080"
+    depends_on:
+      - sys-db
+    environment:
+      # Se usa el nombre del servicio 'sys-db' como host
+      SPRING_DATASOURCE_URL: jdbc:postgresql://sys-db:5432/sys_db
+      SPRING_DATASOURCE_USERNAME: user_sanos
+      SPRING_DATASOURCE_PASSWORD: admin_password
+
+  # Microservicio Motor de Coincidencias
+  match-service:
+    build: ./match-service
+    container_name: sanos-salvos-match
+    ports:
+      - "8082:8080"
+    depends_on:
+      - pet-service
+    environment:
+      # Configuración necesaria para que Feign encuentre al otro servicio
+      PET_SERVICE_URL: http://pet-service:8081
+
+
+volumes:
+  postgres_data:
