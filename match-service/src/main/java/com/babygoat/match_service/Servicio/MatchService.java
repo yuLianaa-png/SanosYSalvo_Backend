@@ -1,7 +1,7 @@
 package com.babygoat.match_service.Servicio;
 
-import com.babygoat.match_service.Cliente.clienteMascota;
 import com.babygoat.match_service.DTO.petDTO;
+import com.babygoat.match_service.repository.clienteMascota;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +21,8 @@ public class MatchService {
     }
 
     public List<petDTO> buscarPorEstado(String estado) {
-        // 1. Obtenemos todas las mascotas del pet-service mediante Feign
+        // Obtenemos todas las mascotas del pet-service mediante Feign
         List<petDTO> todas = Cliente.obtenerMascotas();
-
-        // 2. Filtramos solo por el estado solicitado (ignorando mayúsculas)
         return todas.stream()
                 .filter(p -> p.getEstado().equalsIgnoreCase(estado))
                 .collect(Collectors.toList());

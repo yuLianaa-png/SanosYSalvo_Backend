@@ -1,4 +1,4 @@
-package com.babygoat.match_service.Cliente;
+package com.babygoat.match_service.repository;
 
 import com.babygoat.match_service.DTO.petDTO;
 import org.springframework.cloud.openfeign.FeignClient;

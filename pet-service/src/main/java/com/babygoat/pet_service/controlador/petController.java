@@ -14,12 +14,12 @@ public class petController {
     @Autowired
     private petRepository repository;
 
-    @PostMapping // IE1: Implementa endpoints funcionales
+    @PostMapping("/ingresar")
     public ResponseEntity<Pet> registrar(@RequestBody Pet pet) {
         return ResponseEntity.ok(repository.save(pet));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Pet> listar() {
         return repository.findAll();
     }

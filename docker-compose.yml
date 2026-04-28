@@ -10,8 +10,10 @@ services:
       - "5433:5432"
     volumes:
       - ./postgres_data:/var/lib/postgresql/data # <--- ESTA LÍNEA ES LA MAGIA DE QUE NO SE BORREN LOS DATO SDJFDJFHSJKHDN
+    networks:
+      - pet-network
   
-  # Microservicio de Registro
+  # Microservicio de registro de mascota
   pet-service:
     build: ./pet-service
     container_name: sanos-salvos-petserv
@@ -24,8 +26,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://sys-db:5432/sys_db
       SPRING_DATASOURCE_USERNAME: user_sanos
       SPRING_DATASOURCE_PASSWORD: admin_password
+    networks:
+      - pet-network
 
-  # Microservicio Motor de Coincidencias
+  # Microservicio de matching
   match-service:
     build: ./match-service
     container_name: sanos-salvos-match
@@ -35,8 +39,29 @@ services:
       - pet-service
     environment:
       # Configuración necesaria para que Feign encuentre al otro servicio
-      PET_SERVICE_URL: http://pet-service:8081
+      PET_SERVICE_URL: http://pet-service:8080
+    networks:
+      - pet-network
 
+  #Microservicio de auth
+  auth-service:
+    build: ./auth-service
+    container_name: sanos-salvos-auth
+    ports:
+      - "8083:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://sys-db:5432/sys_db
+      SPRING_DATASOURCE_USERNAME: user_sanos
+      SPRING_DATASOURCE_PASSWORD: admin_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - sys-db
+    networks:
+      - pet-network
+
+networks:
+  pet-network:
+    driver: bridge
 
 volumes:
   postgres_data:

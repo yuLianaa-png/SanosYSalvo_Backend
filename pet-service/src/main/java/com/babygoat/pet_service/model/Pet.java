@@ -15,6 +15,7 @@ public class Pet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     private Long id;
+    private Long usuarioId;
 
     private String nombre;
     private String raza;
@@ -26,3 +27,4 @@ public class Pet {
     private LocalDateTime fechaReporte = LocalDateTime.now();
 
 }
+
