@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // Metodo clave para buscar por nombre de usuario en el login
     Optional<Usuario> findByUsuario(String usuario);
+
+    Optional<Usuario> findById(Long id);
 }

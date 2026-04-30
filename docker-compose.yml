@@ -1,31 +1,70 @@
 services:
-  sys-db:
-    image: postgres:15 #imagen que se descarga ya construida, como molde
-    container_name: sys-db
+  #BASES DE DATOS DE LOS MICROSERVICIOS ----------------------------------------
+
+  #Base de datps para auth-service
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
     environment:
-      POSTGRES_DB: sys_db
-      POSTGRES_USER: user_sanos
-      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: user_auth
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5434:5432" # Puerto diferente para que puedas entrar desde fuera con DBeaver/PgAdmin
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+
+  #Base de datos para pet-services
+  pet-db:
+    image: postgres:15
+    container_name: pet-db
+    environment:
+      POSTGRES_DB: pet_db
+      POSTGRES_USER: user_pet
+      POSTGRES_PASSWORD: pet_password
     ports:
       - "5433:5432"
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data # <--- ESTA LÍNEA ES LA MAGIA DE QUE NO SE BORREN LOS DATO SDJFDJFHSJKHDN
+      - pet_postgres_data:/var/lib/postgresql/data
     networks:
       - pet-network
-  
-  # Microservicio de registro de mascota
+
+  #Base de datos para match-service
+  match-db:
+    image: postgres:15
+    container_name: match-db
+    environment:
+      POSTGRES_DB: match_db
+      POSTGRES_USER: user_match
+      POSTGRES_PASSWORD: match_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - match_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+
+  #--------------------------------------------------------------------------------------------------
+
+  #MICROSERVICIOS------------------------------------------------------------------------------------
+  # Microservicio de pet service
   pet-service:
     build: ./pet-service
     container_name: sanos-salvos-petserv
     ports:
       - "8081:8080"
     depends_on:
-      - sys-db
+      - pet-db
     environment:
       # Se usa el nombre del servicio 'sys-db' como host
-      SPRING_DATASOURCE_URL: jdbc:postgresql://sys-db:5432/sys_db
-      SPRING_DATASOURCE_USERNAME: user_sanos
-      SPRING_DATASOURCE_PASSWORD: admin_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pet-db:5432/pet_db
+      SPRING_DATASOURCE_USERNAME: user_pet
+      SPRING_DATASOURCE_PASSWORD: pet_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      MATCH_SERVICE_URL: http://sanos-salvos-match:8080
+      AUTH_SERVICE_URL: http://sanos-salvos-auth:8080
     networks:
       - pet-network
 
@@ -36,10 +75,18 @@ services:
     ports:
       - "8082:8080"
     depends_on:
-      - pet-service
+      pet-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
     environment:
       # Configuración necesaria para que Feign encuentre al otro servicio
+      SPRING_DATASOURCE_URL: jdbc:postgresql://match-db:5432/match_db
+      SPRING_DATASOURCE_USERNAME: user_match
+      SPRING_DATASOURCE_PASSWORD: match_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       PET_SERVICE_URL: http://pet-service:8080
+      AUTH_SERVICE_URL: http://auth-service:8080
     networks:
       - pet-network
 
@@ -50,18 +97,21 @@ services:
     ports:
       - "8083:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://sys-db:5432/sys_db
-      SPRING_DATASOURCE_USERNAME: user_sanos
-      SPRING_DATASOURCE_PASSWORD: admin_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: user_auth
+      SPRING_DATASOURCE_PASSWORD: auth_password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
-      - sys-db
+      - auth-db
     networks:
       - pet-network
+#----------------------------------------------------------------------------------------------------
 
 networks:
   pet-network:
     driver: bridge
 
 volumes:
-  postgres_data:
+  auth_postgres_data:
+  pet_postgres_data:
+  match_postgres_data:

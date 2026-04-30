@@ -2,8 +2,10 @@ package com.babygoat.auth_service.Model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
 @Setter
 @Getter
 @Entity
@@ -22,6 +24,5 @@ public class Usuario {
     private String email;
     private String nombre;
     private String telefono;
-
 }
 
