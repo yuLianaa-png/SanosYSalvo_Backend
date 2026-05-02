@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PetService {
@@ -22,6 +23,7 @@ public class PetService {
     @Autowired
     private AuthCliente authCliente;
 
+    //Registra mascota
     public Pet registrarMascota(Pet mascota, Long userId) {
         try {
             UsuarioDTO usuario = authCliente.obtenerUsuarioPorId(userId);
@@ -54,7 +56,42 @@ public class PetService {
         return mascotaGuardada;
     }
 
+    //Actualiza detalle de mascota
+    public Pet actualizarMascota(Long id, Pet detalles) {
+        Pet pet = petRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+        pet.setNombre(detalles.getNombre());
+        pet.setRaza(detalles.getRaza());
+        pet.setColor(detalles.getColor());
+        pet.setTamano(detalles.getTamano());
+        pet.setEstado(detalles.getEstado());
+        pet.setUbicacion(detalles.getUbicacion()); // Importante para cambiar de PERDIDA a ENCONTRADA
+        return petRepository.save(pet);
+    }
+
+    //Elimina mascota
+    public void eliminarMascota(Long id) {
+        if (!petRepository.existsById(id)) {
+            throw new RuntimeException("No se puede eliminar: Mascota no encontrada");
+        }
+        petRepository.deleteById(id);
+    }
+
+    //Lista todas las mascotas que hay en el sistema
     public List<Pet> listarTodas() {
         return petRepository.findAll();
+    }
+
+    //buscar mascotas por raza y color
+    public List<Pet> buscarPorRazaYColor(String raza, String color) {
+        return petRepository.findByRazaIgnoreCaseAndColorIgnoreCase(raza, color);
+    }
+
+    //mostrar mascotas según su estado
+    public List<Pet> buscarPorEstado(String estado) {
+        List<Pet> todas = petRepository.findByEstadoIgnoreCase(estado);
+        return todas.stream()
+                .filter(p -> p.getEstado().equalsIgnoreCase(estado))
+                .collect(Collectors.toList());
     }
 }
