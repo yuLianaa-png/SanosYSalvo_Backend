@@ -1,7 +1,6 @@
 package com.babygoat.match_service.controlador;
 
 import com.babygoat.match_service.DTO.MatchDTO;
-import com.babygoat.match_service.DTO.petDTO;
 import com.babygoat.match_service.Servicio.MatchService;
 import com.babygoat.match_service.model.Match;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +17,6 @@ public class matchController {
     @Autowired
     private MatchService matchService;
 
-    @GetMapping("/estado/{estado}")
-    public List<petDTO> listarPorEstado(@PathVariable("estado") String estado) {
-        return matchService.buscarPorEstado(estado);
-    }
-
-    @GetMapping("/buscar")
-    public List<petDTO> buscarCoincidencias(
-            @RequestParam String raza,
-            @RequestParam String color) {
-
-        return matchService.buscarMatches(raza, color);
-    }
-
     @GetMapping("/usuario/{userId}")
     public ResponseEntity<List<Match>> listarPorUsuario(@PathVariable Long userId) {
         List<Match> matches = matchService.obtenerMatchesPorUsuario(userId);
@@ -46,5 +32,18 @@ public class matchController {
             // Esto te dirá en los logs de Docker por qué falló el guardado
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+
+    // Obtener todos los matches (Para una vista general de administración)
+    @GetMapping
+    public ResponseEntity<List<Match>> listarTodos() {
+        return ResponseEntity.ok(matchService.listarTodos());
+    }
+
+    // Eliminar un match (Cuando la mascota ya fue entregada o fue un error)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarMatch(@PathVariable Long id) {
+        matchService.eliminarMatch(id);
+        return ResponseEntity.noContent().build();
     }
 }
