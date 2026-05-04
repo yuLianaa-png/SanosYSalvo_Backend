@@ -15,12 +15,11 @@ public class NotificacionService {
     private NotificacionRepository notificacionRepository;
 
     public void guardarNotificacion(NotificacionDTO dto) {
-        ObjectMapper mapper = new ObjectMapper(); // ObjectMapper simple para evitar conflictos de módulos
+        ObjectMapper mapper = new ObjectMapper();
         try {
             Notificacion notif = new Notificacion();
             notif.setUserId(dto.getUserId());
             notif.setMensaje(dto.getMensaje());
-            // La fecha ya se setea por defecto en el modelo (private LocalDateTime fechaCreacion = LocalDateTime.now();)
 
             if (dto.getSugerencias() != null) {
                 String jsonSugerencias = mapper.writeValueAsString(dto.getSugerencias());
@@ -29,7 +28,7 @@ public class NotificacionService {
 
             notificacionRepository.save(notif);
         } catch (Exception e) {
-            e.printStackTrace(); // Esto te mostrará el error real en la consola
+            e.printStackTrace();
             throw new RuntimeException("Error en persistencia: " + e.getMessage());
         }
     }
