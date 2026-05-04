@@ -1,68 +1,124 @@
-# Sistema de Gestión de Mascotas "Sanos y Salvos"
+# Sanos y Salvos - Sistema de Recuperación de Mascotas
 
-Este proyecto es una solución basada en Microservicios diseñada para la gestión y recuperación de mascotas perdidas. La
-arquitectura permite el registro de hallazgos y un motor de coincidencias inteligente para conectar mascotas perdidas
-con sus dueños.
+Sistema basado en una arquitectura de microservicios diseñado para facilitar el encuentro de mascotas perdidas mediante
+un motor de coincidencias en tiempo real y notificaciones automatizadas.
 
-Arquitectura del Sistema
-La solución se compone de tres contenedores principales orquestados con Docker Compose:
+## Arquitectura del Sistema
 
-- Pet-Service (Puerto 8081): Microservicio encargado de la persistencia de datos (CRUD) de mascotas.
+El proyecto se compone de microservicios independientes, cada uno con su propia base de datos PostgreSQL, comunicados
+mediante Feign Clients y protegidos con JWT.
 
-- Match-Service (Puerto 8082): Microservicio de lógica de negocio que utiliza Netflix Feign para consumir datos del
-  Pet-Service y aplicar filtros de búsqueda.
+### Microservicios:
 
-- Database (Puerto 5433): Instancia de PostgreSQL 15 para el almacenamiento persistente.
+- _**Auth-Service:**_ Gestión de usuarios y emisión de tokens JWT para seguridad entre servicios.
 
-- Requisitos Previos
-  Java 17 (Eclipse Temurin recomendado)
+- _**Pet-Service:**_ Administración del ciclo de vida de las mascotas registradas (Perdidas/Encontradas).
 
-- Maven 3.8+
+- _**Match-Service:**_ Motor de búsqueda de coincidencias basado en filtros geográficos, raza y color.
 
-- Docker & Docker Desktop
+- _**Notification-Service:**_ Registro y persistencia de alertas de coincidencia para los usuarios.
 
-- Postman (para pruebas de API)
+## Dependencias Core del Proyecto
 
-## Instalación y Despliegue
+Cada microservicio utiliza las siguientes librerías de Spring Boot 3.x y Spring Cloud para garantizar su funcionamiento:
 
-Siga estos pasos para levantar el entorno completo:
+**1. Comunicación y Nube (Spring Cloud)**
 
-### Compilar los microservicios:
+- **OpenFeign:** Utilizado para la comunicación declarativa entre servicios (ej. Match-Service notificando al
+  Notification-Service).
+- **Spring Cloud Dependencies:** Gestión centralizada de versiones para microservicios.
 
-Desde la carpeta raíz, ejecute:
+**2. Seguridad y Autenticación**
 
-- Bash
-  cd pet-service && ./mvnw clean package -DskipTests && cd ..
-  cd match-service && ./mvnw clean package -DskipTests && cd ..
+- **Spring Boot Starter Security:** Implementación de filtros de seguridad y políticas de acceso.
+- **JJWT (io.jsonwebtoken):** Generación, firma y validación de tokens JWT para asegurar la identidad entre nodos.
 
-Levantar la infraestructura:
+**3. Persistencia de Datos**
 
-- Bash
-  docker-compose up --build -d
+- **Spring Data JPA:** Abstracción para el manejo de repositorios y persistencia en base de datos.
+- **PostgreSQL Driver:** Conector oficial para la base de datos relacional PostgreSQL.
+- **Hibernate:** Motor ORM para el mapeo de entidades con soporte para estándares snake_case.
 
-## Documentación de la API
+**4. Utilidades y Serialización**
 
-1. Pet Service (Persistencia)
-    - POST /api/pets: Registrar una nueva mascota.
-    - GET /api/pets: Obtener el listado completo.
+- **Lombok:** Reducción de código repetitivo (Boilerplate) mediante anotaciones como _**@Data**_ y
+  _**@AllArgsConstructor**_.
+- **Jackson JSR310:** Módulo para la correcta serialización de fechas modernas como LocalDateTime en los DTOs.
+- **Spring Boot Starter Web:** Servidor embebido Tomcat y soporte para APIs RESTful.
 
-2. Match Service (Lógica de Negocio)
-    - GET /api/matches/buscar?raza=X&color=Y: Busca coincidencias por raza y color mediante comunicación inter-servicio.
-    - GET /api/matches/por-estado?estado=PERDIDA: Filtra mascotas según su estado actual.
+## Requisitos e Instalación
 
-## Persistencia de Datos
+1. Clonar el repositorio:
 
-El sistema utiliza Volúmenes de Docker mapeados a la carpeta ./postgres_data. Esto garantiza que los datos no se pierdan
-al ejecutar docker-compose down.
+   `git clone https://github.com/tu-usuario/sanos-salvos.git`
 
-## Tecnologías Utilizadas
+2. Compilar los servicios:
 
-- Spring Boot 4.0.6
+   `./mvn clean package -DskipTests`
 
-- Spring Data JPA / Hibernate
+3. Desplegar con Docker:
 
-- Spring Cloud OpenFeign (Comunicación REST)
+   `docker-compose up --build`
 
-- PostgreSQL 15
+## Stack Tecnológico
 
-- Docker & Docker Compose
+* **Lenguaje:** Java 17
+
+* **Framework:** Spring Boot 3.3.x / Spring Cloud
+
+* **Seguridad:** Spring Security & JWT
+
+* **Base de Datos:** PostgreSQL
+
+* **Contenedores:** Docker & Docker Compose
+
+* **Herramientas:** Lombok, Jackson (JSR310), Hibernate JPA
+
+## API Endpoints
+
+1. **Auth-Service (Puerto 8083)**
+    * **POST** /api/auth/registrar: Registro de nuevos usuarios.
+    * **POST** /api/auth/login: Autenticación y generación de token JWT.
+    * **GET** /api/auth/buscar/{username}: Obtención de detalles de usuario (uso interno).
+
+
+2. **Pet-Service (Puerto 8081)**
+    * **POST** /api/mascotas/registrar: Registro de mascota (perdida o encontrada).
+
+    * **GET** /api/mascotas: Listado completo de mascotas registradas.
+
+    * **GET** /api/mascotas/buscar/match: (Uso Interno) Búsqueda filtrada por raza, color, ubicación y estado.
+
+    * **PUT** /api/mascotas/{id}: Modificación de datos o estado de una mascota.
+
+    * **DELETE** /api/mascotas/{id}: Eliminación de un registro de mascota.
+
+
+3. **Match-Service (Puerto 8082)**
+    * **POST** /api/matches/crear: Recibe una nueva mascota, busca coincidencias en Pet-Service y dispara notificaciones
+      en Notification-Service. (Uso Interno)
+
+    * **GET** /api/matches: Listado de todos los matches exitosos generados por el sistema.
+
+    * **GET** /api/matches/Usuario/{UserId}: Devuelve las publicaciones hechas (match en la bd del usuario y el animal)
+
+
+4. **Notification-Service (Puerto 8084)**
+    * **POST** /api/notificaciones/enviar: (Uso Interno) Recibe y persiste alertas de match enviadas por el
+      Match-Service.
+
+    * **GET** /api/notificaciones/usuario/{userId}: Recupera todas las alertas pendientes para un usuario.
+
+    * **DELETE** /api/notificaciones/limpiar/{userId}: Elimina el historial de notificaciones de un usuario. (AUN NO
+      APLICADA)
+
+## Notas de Implementación:
+
+### Seguridad:
+
+Todos los métodos (excepto Login y Registro) requieren el encabezado Authorization: Bearer <token_jwt>.
+
+### Estandarización:
+
+Las respuestas siguen el formato JSON y utilizan códigos de estado HTTP estándar (200 OK, 201 Created,
+401 Unauthorized, 500 Error).

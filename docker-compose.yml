@@ -46,6 +46,21 @@ services:
     networks:
       - pet-network
 
+  #Base de datos para notification-service
+  notification-db:
+    image: postgres:15
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: user_notif
+      POSTGRES_PASSWORD: notif_password
+    ports:
+      - "5436:5432"
+    volumes:
+      - notif_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+
   #--------------------------------------------------------------------------------------------------
 
   #MICROSERVICIOS------------------------------------------------------------------------------------
@@ -105,6 +120,22 @@ services:
       - auth-db
     networks:
       - pet-network
+
+  #Microservicio de Notificaciones
+  notification-service:
+    build: ./notification-service
+    container_name: sanos-salvos-notif
+    ports:
+      - "8084:8080"
+    depends_on:
+      - notification-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: user_notif
+      SPRING_DATASOURCE_PASSWORD: notif_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - pet-network
 #----------------------------------------------------------------------------------------------------
 
 networks:
@@ -115,3 +146,4 @@ volumes:
   auth_postgres_data:
   pet_postgres_data:
   match_postgres_data:
+  notif_postgres_data:

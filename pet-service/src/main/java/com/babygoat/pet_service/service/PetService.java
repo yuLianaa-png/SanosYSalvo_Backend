@@ -1,6 +1,7 @@
 package com.babygoat.pet_service.service;
 
 import com.babygoat.pet_service.DTO.MatchDTO;
+import com.babygoat.pet_service.DTO.PetDTO;
 import com.babygoat.pet_service.DTO.UsuarioDTO;
 import com.babygoat.pet_service.model.Pet;
 import com.babygoat.pet_service.repository.AuthCliente;
@@ -24,32 +25,47 @@ public class PetService {
     private AuthCliente authCliente;
 
     //Registra mascota
-    public Pet registrarMascota(Pet mascota, Long userId) {
+    public Pet registrarMascota(Pet mascota, String identity) {
+        UsuarioDTO usuario;
         try {
-            UsuarioDTO usuario = authCliente.obtenerUsuarioPorId(userId);
-            // se vincula el teléfono automáticamente
-            mascota.setContactoTutor(usuario.getTelefono());
-            mascota.setUsuarioId(userId);
+            usuario = authCliente.obtenerUsuarioPorNombre(identity);
+            if (usuario == null) {
+                throw new RuntimeException("El usuario autenticado no existe en la base de datos.");
+            }
         } catch (Exception e) {
-            System.err.println("No se pudo obtener el teléfono del usuario, se guardará sin él.");
+            throw new RuntimeException("Error crítico: No se pudo validar la identidad del token. " + e.getMessage());
         }
 
+        // 1. Seteamos los datos del tutor y el ID real del usuario
+        Long realUserId = usuario.getId();
+        mascota.setContactoTutor(usuario.getTelefono());
+        mascota.setUsuarioId(realUserId);
+
+        // 2. Guardamos la mascota una sola vez
         Pet mascotaGuardada = petRepository.save(mascota);
 
-        //Si el estado es "Perdida" o "Encontrada", disparamos el match automático
-        if (mascota.getEstado() != null &&
-                (mascota.getEstado().equalsIgnoreCase("PERDIDA") ||
-                        mascota.getEstado().equalsIgnoreCase("ENCONTRADA"))) {
-
-            MatchDTO matchReq = new MatchDTO();
-            matchReq.setPetId(mascotaGuardada.getId());
-            matchReq.setUserId(userId);
+        // 3. Verificamos si aplica para Match
+        if (mascotaGuardada.getEstado() != null &&
+                (mascotaGuardada.getEstado().equalsIgnoreCase("PERDIDA") ||
+                        mascotaGuardada.getEstado().equalsIgnoreCase("ENCONTRADA"))) {
 
             try {
-                matchCliente.avisarNuevoMatch(matchReq);
+                // 4. PREPARAMOS EL DTO CON Tod
+                MatchDTO aviso = new MatchDTO();
+                aviso.setPetId(mascotaGuardada.getId());
+                aviso.setUserId(mascotaGuardada.getUsuarioId());
+                aviso.setRaza(mascotaGuardada.getRaza());
+                aviso.setColor(mascotaGuardada.getColor());
+                aviso.setUbicacion(mascotaGuardada.getUbicacion());
+                aviso.setEstado(mascotaGuardada.getEstado());
+
+                // 5. ENVIAMOS EL OBJETO CORRECTO ('aviso', no 'matchReq')
+                matchCliente.avisarNuevoMatch(aviso);
+
+                System.out.println("DEBUG: Aviso de match enviado exitosamente para mascota: " + mascotaGuardada.getId());
+
             } catch (Exception e) {
-                // Logeamos el error pero no detenemos el registro de la mascota
-                System.out.println("No se pudo crear el match automático, pero la mascota se guardó.");
+                System.err.println("Error detallado del Match-Service: " + e.getMessage());
             }
         }
 
@@ -83,8 +99,8 @@ public class PetService {
     }
 
     //buscar mascotas por raza y color
-    public List<Pet> buscarPorRazaYColor(String raza, String color) {
-        return petRepository.findByRazaIgnoreCaseAndColorIgnoreCase(raza, color);
+    public List<PetDTO> buscarPorRazaYColor(String raza, String color, String ubicacion, String estado) {
+        return petRepository.buscarCoincidenciasManual(raza, color, estado, ubicacion);
     }
 
     //mostrar mascotas según su estado

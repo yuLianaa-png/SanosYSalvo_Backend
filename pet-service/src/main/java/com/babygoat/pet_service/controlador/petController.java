@@ -2,6 +2,8 @@
 
 package com.babygoat.pet_service.controlador;
 
+
+import com.babygoat.pet_service.DTO.PetDTO;
 import com.babygoat.pet_service.model.Pet;
 import com.babygoat.pet_service.repository.petRepository;
 import com.babygoat.pet_service.service.PetService;
@@ -20,13 +22,15 @@ public class petController {
     private petRepository petRepository;
 
     //Registra mascota
-    @PostMapping
-    // Agregamos @RequestParam para recibir el ID del usuario que registra
-    public ResponseEntity<Pet> registrar(@RequestBody Pet pet, @RequestParam Long userId) {
-        return ResponseEntity.ok(service.registrarMascota(pet, userId));
+    @PostMapping("/registrar")
+    public ResponseEntity<Pet> registrar(@RequestBody Pet pet) {
+        String identity = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication().getName();
+
+        return ResponseEntity.ok(service.registrarMascota(pet, identity));
     }
 
-    //Actualiza detalle de mascota
+    //Actualiza detalle de mascota (funciona pero hay que mejorar)
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Pet petDetalles) {
         try {
@@ -63,13 +67,15 @@ public class petController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    //buscar mascotas por raza y color
-    @GetMapping("/buscar")
-    public List<Pet> buscarCoincidencias(
+    //buscar mascotas por raza y color !!
+    @GetMapping("/buscar/match")
+    public List<PetDTO> buscarCoincidencias(
             @RequestParam String raza,
-            @RequestParam String color) {
+            @RequestParam String color,
+            @RequestParam String estado,
+            @RequestParam String ubicacion) {
 
-        return service.buscarPorRazaYColor(raza, color);
+        return service.buscarPorRazaYColor(raza, color, ubicacion, estado);
     }
 
     //mostrar mascotas según su estado
