@@ -15,11 +15,11 @@ public class Match {
     private Long id;
 
     // Guardamos solo el ID que viene del Pet Service
-    @Column(name = "petid", nullable = false)
+    @Column(name = "pet_id", nullable = false)
     private Long petId;
 
     // Guardamos el ID del usuario que viene del Auth Service
-    @Column(name = "userid", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     private LocalDateTime fechaMatch;

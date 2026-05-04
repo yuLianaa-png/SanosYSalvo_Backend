@@ -1,4 +1,4 @@
-//logica, validar si el usuario existe y si la contraseña coincide
+// logica
 
 package com.babygoat.auth_service.Service;
 
@@ -22,5 +22,10 @@ public class AuthService {
     public Optional<Usuario> validarLogin(String usuario, String contrasena) {
         return repository.findByUsuario(usuario)
                 .filter(u -> u.getContrasena().equals(contrasena)); // Comparación simple
+    }
+
+    public Usuario buscarPorUsuario(String nombreUsuario) {
+        return repository.findByUsuario(nombreUsuario)
+                .orElse(null);
     }
 }

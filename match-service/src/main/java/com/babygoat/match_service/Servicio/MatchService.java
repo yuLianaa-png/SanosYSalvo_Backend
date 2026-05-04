@@ -1,60 +1,94 @@
 package com.babygoat.match_service.Servicio;
 
 import com.babygoat.match_service.DTO.MatchDTO;
+import com.babygoat.match_service.DTO.MatchResponseDTO;
+import com.babygoat.match_service.DTO.NotificacionDTO;
 import com.babygoat.match_service.DTO.petDTO;
 import com.babygoat.match_service.model.Match;
+import com.babygoat.match_service.repository.NotificacionUsuario;
 import com.babygoat.match_service.repository.clienteMascota;
 import com.babygoat.match_service.repository.matchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
     @Autowired
-    private clienteMascota Cliente;
-    @Autowired
     private matchRepository matchRepository;
 
-    //Metodo para buscar mascotas por raza y color
-    public List<petDTO> buscarMatches(String raza, String color) {
-        List<petDTO> todas = Cliente.obtenerMascotas();
-        return todas.stream()
-                .filter(p -> p.getRaza() != null && p.getColor() != null)
-                .filter(p -> p.getRaza().equalsIgnoreCase(raza) && p.getColor().equalsIgnoreCase(color))
-                .collect(Collectors.toList());
-    }
+    @Autowired
+    private NotificacionUsuario notificacionUsuario;
 
-    // Metodo para mostrar mascotas según su estado
-    public List<petDTO> buscarPorEstado(String estado) {
-        // Obtenemos todas las mascotas del pet-service mediante Feign
-        List<petDTO> todas = Cliente.obtenerMascotas();
-        return todas.stream()
-                .filter(p -> p.getEstado().equalsIgnoreCase(estado))
-                .collect(Collectors.toList());
-    }
+    @Autowired
+    private clienteMascota petCliente;
 
-    //Metodo para crear el match entre usuario y mascota
-    public Match crearMatchValidado(MatchDTO request) {
-        try {
-            //petDTO mascota = Cliente.obtenerMascotaPorId(request.getPetId());
+    //Crear el match
+    public MatchResponseDTO crearMatchValidado(MatchDTO request) {
+        Match nuevoMatch = new Match();
+        nuevoMatch.setPetId(request.getPetId());
+        nuevoMatch.setUserId(request.getUserId());
 
-            Match nuevoMatch = new Match();
-            nuevoMatch.setPetId(request.getPetId());
-            nuevoMatch.setUserId(request.getUserId());
+        System.out.println("Intentando guardar Match con PetID: " + request.getPetId() + " y UserID: " + request.getUserId());
+        Match matchGuardado = matchRepository.save(nuevoMatch);
 
-            return matchRepository.save(nuevoMatch);
+        String estadoBusqueda = request.getEstado().equalsIgnoreCase("PERDIDA") ? "ENCONTRADA" : "PERDIDA";
 
-        } catch (Exception e) {
-            // Si el Pet Service devuelve 404 o está caído, lanzamos error
-            throw new RuntimeException("No se pudo realizar el match: Mascota no encontrada o servicio no disponible");
+        List<petDTO> coincidencias = petCliente.buscarPorFiltros(
+                request.getRaza(),
+                request.getColor(),
+                request.getUbicacion(),
+                estadoBusqueda
+        );
+
+        if (!coincidencias.isEmpty()) {
+            // Notificar al usuario que acaba de subir la publicación
+            NotificacionDTO notifUsuarioActual = new NotificacionDTO();
+            notifUsuarioActual.setUserId(request.getUserId());
+            notifUsuarioActual.setMensaje("¡Hemos encontrado " + coincidencias.size() + " posibles coincidencias para tu mascota!");
+            notifUsuarioActual.setSugerencias(coincidencias);
+            notificacionUsuario.enviarNotificacion(notifUsuarioActual);
+
+            // Notificar a cada dueño de las mascotas encontradas
+            for (petDTO coincidencia : coincidencias) {
+                petDTO mascotaActualInfo = new petDTO();
+                mascotaActualInfo.setId(request.getPetId());
+                mascotaActualInfo.setRaza(request.getRaza());
+                mascotaActualInfo.setColor(request.getColor());
+                mascotaActualInfo.setUbicacion(request.getUbicacion());
+                mascotaActualInfo.setEstado(request.getEstado());
+                mascotaActualInfo.setUsuarioId(request.getUserId());
+
+                NotificacionDTO notifMatch = new NotificacionDTO();
+                notifMatch.setUserId(coincidencia.getUsuarioId());
+                notifMatch.setMensaje("Alguien ha publicado una mascota que coincide con la tuya (" + request.getRaza() + ").");
+                notifMatch.setSugerencias(Collections.singletonList(mascotaActualInfo));
+
+                //Con esto se envia notificacion
+                notificacionUsuario.enviarNotificacion(notifMatch);
+            }
         }
+
+        return new MatchResponseDTO(matchGuardado, coincidencias);
     }
 
-    // Metodo que devuelve las mascotas que estan vinculadas a un usuario
+    // Devuelve las mascotas que estan vinculadas a un usuario
     public List<Match> obtenerMatchesPorUsuario(Long userId) {
         return matchRepository.findByUserId(userId);
+    }
+
+    //Listar matches
+    public List<Match> listarTodos() {
+        return matchRepository.findAll();
+    }
+
+    //Eliminar match
+    public void eliminarMatch(Long id) {
+        if (!matchRepository.existsById(id)) {
+            throw new RuntimeException("Match no encontrado");
+        }
+        matchRepository.deleteById(id);
     }
 }
