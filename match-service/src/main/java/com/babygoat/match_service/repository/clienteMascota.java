@@ -11,11 +11,9 @@ import java.util.List;
 
 @FeignClient(name = "pet-service", url = "http://sanos-salvos-petserv:8080", configuration = FeignConfig.class)
 public interface clienteMascota {
-    // Esencial: Para verificar que la mascota existe antes de crear un match
     @GetMapping("/api/mascotas/{id}")
     petDTO obtenerMascotaPorId(@PathVariable("id") Long id);
 
-    // Opcional: Si quieres que el Match-Service muestre detalles (raza, color) en su respuesta
     @GetMapping("/api/mascotas/buscar/match")
     List<petDTO> buscarPorFiltros(@RequestParam("raza") String raza, @RequestParam("color") String color, @RequestParam("ubicacion") String ubicacion, @RequestParam("estado") String estado);
 }

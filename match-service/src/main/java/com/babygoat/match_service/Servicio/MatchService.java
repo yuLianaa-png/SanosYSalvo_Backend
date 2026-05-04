@@ -44,14 +44,14 @@ public class MatchService {
         );
 
         if (!coincidencias.isEmpty()) {
-            // A. Notificar al usuario que acaba de subir la publicación
+            // Notificar al usuario que acaba de subir la publicación
             NotificacionDTO notifUsuarioActual = new NotificacionDTO();
             notifUsuarioActual.setUserId(request.getUserId());
             notifUsuarioActual.setMensaje("¡Hemos encontrado " + coincidencias.size() + " posibles coincidencias para tu mascota!");
             notifUsuarioActual.setSugerencias(coincidencias);
             notificacionUsuario.enviarNotificacion(notifUsuarioActual);
 
-            // B. Notificar a cada dueño de las mascotas encontradas
+            // Notificar a cada dueño de las mascotas encontradas
             for (petDTO coincidencia : coincidencias) {
                 petDTO mascotaActualInfo = new petDTO();
                 mascotaActualInfo.setId(request.getPetId());
@@ -66,7 +66,7 @@ public class MatchService {
                 notifMatch.setMensaje("Alguien ha publicado una mascota que coincide con la tuya (" + request.getRaza() + ").");
                 notifMatch.setSugerencias(Collections.singletonList(mascotaActualInfo));
 
-                // Enviamos la notificación
+                //Con esto se envia notificacion
                 notificacionUsuario.enviarNotificacion(notifMatch);
             }
         }
