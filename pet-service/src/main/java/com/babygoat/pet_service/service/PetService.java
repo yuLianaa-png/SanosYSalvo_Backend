@@ -36,21 +36,17 @@ public class PetService {
             throw new RuntimeException("Error crítico: No se pudo validar la identidad del token. " + e.getMessage());
         }
 
-        // 1. Seteamos los datos del tutor y el ID real del usuario
         Long realUserId = usuario.getId();
         mascota.setContactoTutor(usuario.getTelefono());
         mascota.setUsuarioId(realUserId);
 
-        // 2. Guardamos la mascota una sola vez
         Pet mascotaGuardada = petRepository.save(mascota);
 
-        // 3. Verificamos si aplica para Match
         if (mascotaGuardada.getEstado() != null &&
                 (mascotaGuardada.getEstado().equalsIgnoreCase("PERDIDA") ||
                         mascotaGuardada.getEstado().equalsIgnoreCase("ENCONTRADA"))) {
 
             try {
-                // 4. PREPARAMOS EL DTO CON Tod
                 MatchDTO aviso = new MatchDTO();
                 aviso.setPetId(mascotaGuardada.getId());
                 aviso.setUserId(mascotaGuardada.getUsuarioId());
@@ -59,7 +55,6 @@ public class PetService {
                 aviso.setUbicacion(mascotaGuardada.getUbicacion());
                 aviso.setEstado(mascotaGuardada.getEstado());
 
-                // 5. ENVIAMOS EL OBJETO CORRECTO ('aviso', no 'matchReq')
                 matchCliente.avisarNuevoMatch(aviso);
 
                 System.out.println("DEBUG: Aviso de match enviado exitosamente para mascota: " + mascotaGuardada.getId());
