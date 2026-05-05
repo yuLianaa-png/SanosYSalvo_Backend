@@ -95,7 +95,7 @@ public class PetService {
 
     //buscar mascotas por raza y color
     public List<PetDTO> buscarPorRazaYColor(String raza, String color, String ubicacion, String estado) {
-        return petRepository.buscarCoincidenciasManual(raza, color, estado, ubicacion);
+        return petRepository.buscarCoincidenciasManual(raza, color, ubicacion, estado);
     }
 
     //mostrar mascotas según su estado
