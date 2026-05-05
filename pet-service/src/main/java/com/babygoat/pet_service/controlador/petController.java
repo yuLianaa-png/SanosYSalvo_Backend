@@ -21,6 +21,15 @@ public class petController {
     @Autowired
     private petRepository petRepository;
 
+    // Constructor para permitir inyección en tests y mantener compatibilidad con Spring
+    public petController() {
+    }
+
+    public petController(PetService service, petRepository petRepository) {
+        this.service = service;
+        this.petRepository = petRepository;
+    }
+
     //Registra mascota
     @PostMapping("/registrar")
     public ResponseEntity<Pet> registrar(@RequestBody Pet pet) {
@@ -69,13 +78,24 @@ public class petController {
 
     //buscar mascotas por raza y color !!
     @GetMapping("/buscar/match")
-    public List<PetDTO> buscarCoincidencias(
-            @RequestParam String raza,
-            @RequestParam String color,
-            @RequestParam String estado,
-            @RequestParam String ubicacion) {
+    public ResponseEntity<List<PetDTO>> buscarCoincidencias(
+            @RequestParam(required = false) String raza,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String ubicacion) {
 
-        return service.buscarPorRazaYColor(raza, color, ubicacion, estado);
+        // Normalizar: trim y convertir cadena vacía a null
+        raza = (raza != null && !raza.trim().isEmpty()) ? raza.trim() : null;
+        color = (color != null && !color.trim().isEmpty()) ? color.trim() : null;
+        estado = (estado != null && !estado.trim().isEmpty()) ? estado.trim() : null;
+        ubicacion = (ubicacion != null && !ubicacion.trim().isEmpty()) ? ubicacion.trim() : null;
+
+        List<PetDTO> resultados = service.buscarPorRazaYColor(raza, color, ubicacion, estado);
+
+        if (resultados == null || resultados.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(resultados);
     }
 
     //mostrar mascotas según su estado
