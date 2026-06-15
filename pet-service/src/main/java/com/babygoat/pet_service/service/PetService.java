@@ -1,12 +1,13 @@
-package com.babygoat.pet_service.service;
+package com.babygoat.pet_service.Service;
 
 import com.babygoat.pet_service.DTO.MatchDTO;
 import com.babygoat.pet_service.DTO.PetDTO;
-import com.babygoat.pet_service.DTO.UsuarioDTO;
-import com.babygoat.pet_service.model.Pet;
-import com.babygoat.pet_service.repository.AuthCliente;
-import com.babygoat.pet_service.repository.MatchCliente;
-import com.babygoat.pet_service.repository.petRepository;
+import com.babygoat.pet_service.DTO.UserDTO;
+import com.babygoat.pet_service.Model.Pet;
+import com.babygoat.pet_service.Repository.AuthClient;
+import com.babygoat.pet_service.Repository.MatchClient;
+import com.babygoat.pet_service.Repository.petRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,90 +20,85 @@ public class PetService {
     private petRepository petRepository;
 
     @Autowired
-    private MatchCliente matchCliente;
+    private MatchClient matchClient;
 
     @Autowired
-    private AuthCliente authCliente;
+    private AuthClient authClient;
 
-    //Registra mascota
-    public Pet registrarMascota(Pet mascota, String identity) {
-        UsuarioDTO usuario;
+    public Pet registerPet(Pet pet, String identity) {
+        UserDTO user;
         try {
-            usuario = authCliente.obtenerUsuarioPorNombre(identity);
-            if (usuario == null) {
-                throw new RuntimeException("El usuario autenticado no existe en la base de datos.");
+            user = authClient.getUserByUsername(identity);
+            if (user == null) {
+                throw new RuntimeException("The authenticated user does not exist in the database.");
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error crítico: No se pudo validar la identidad del token. " + e.getMessage());
+            throw new RuntimeException("Critical error: Could not validate token identity. " + e.getMessage());
         }
 
-        Long realUserId = usuario.getId();
-        mascota.setContactoTutor(usuario.getTelefono());
-        mascota.setUsuarioId(realUserId);
+        Long realUserId = user.getId();
+        pet.setTutorContact(user.getPhone());
+        pet.setUserId(realUserId);
 
-        Pet mascotaGuardada = petRepository.save(mascota);
+        Pet savedPet = petRepository.save(pet);
 
-        if (mascotaGuardada.getEstado() != null &&
-                (mascotaGuardada.getEstado().equalsIgnoreCase("PERDIDA") ||
-                        mascotaGuardada.getEstado().equalsIgnoreCase("ENCONTRADA"))) {
+        if (savedPet.getStatus() != null &&
+                (savedPet.getStatus().equalsIgnoreCase("LOST") ||
+                        savedPet.getStatus().equalsIgnoreCase("FOUND"))) {
 
             try {
-                MatchDTO aviso = new MatchDTO();
-                aviso.setPetId(mascotaGuardada.getId());
-                aviso.setUserId(mascotaGuardada.getUsuarioId());
-                aviso.setRaza(mascotaGuardada.getRaza());
-                aviso.setColor(mascotaGuardada.getColor());
-                aviso.setUbicacion(mascotaGuardada.getUbicacion());
-                aviso.setEstado(mascotaGuardada.getEstado());
+                MatchDTO notification = new MatchDTO();
+                notification.setPetId(savedPet.getId());
+                notification.setUserId(savedPet.getUserId());
+                notification.setBreed(savedPet.getBreed());
+                notification.setColor(savedPet.getColor());
+                notification.setLocation(savedPet.getLocation());
+                notification.setStatus(savedPet.getStatus());
 
-                matchCliente.avisarNuevoMatch(aviso);
+                matchClient.notifyNewMatch(notification);
 
-                System.out.println("DEBUG: Aviso de match enviado exitosamente para mascota: " + mascotaGuardada.getId());
+                System.out.println("DEBUG: Match notification sent successfully for pet: " + savedPet.getId());
 
             } catch (Exception e) {
-                System.err.println("Error detallado del Match-Service: " + e.getMessage());
+                System.err.println("Error from Match-Service: " + e.getMessage());
             }
         }
 
-        return mascotaGuardada;
+        return savedPet;
     }
 
-    //Actualiza detalle de mascota
-    public Pet actualizarMascota(Long id, Pet detalles) {
+    public Pet updatePet(Long id, Pet details) {
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
-        pet.setNombre(detalles.getNombre());
-        pet.setRaza(detalles.getRaza());
-        pet.setColor(detalles.getColor());
-        pet.setTamano(detalles.getTamano());
-        pet.setEstado(detalles.getEstado());
-        pet.setUbicacion(detalles.getUbicacion()); // Importante para cambiar de PERDIDA a ENCONTRADA
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+        pet.setName(details.getName());
+        pet.setBreed(details.getBreed());
+        pet.setColor(details.getColor());
+        pet.setSize(details.getSize());
+        pet.setStatus(details.getStatus());
+        pet.setLocation(details.getLocation());
         return petRepository.save(pet);
     }
 
-    //Elimina mascota
-    public void eliminarMascota(Long id) {
+    public void deletePet(Long id) {
         if (!petRepository.existsById(id)) {
-            throw new RuntimeException("No se puede eliminar: Mascota no encontrada");
+            throw new RuntimeException("Cannot delete: Pet not found");
         }
         petRepository.deleteById(id);
     }
 
-    //Lista todas las mascotas que hay en el sistema
-    public List<Pet> listarTodas() {
+    public List<Pet> listAll() {
         return petRepository.findAll();
     }
 
-    //buscar mascotas por raza y color
-    public List<PetDTO> buscarPorRazaYColor(String raza, String color, String ubicacion, String estado) {
-        return petRepository.buscarCoincidenciasManual(raza, color, ubicacion, estado);
+    public List<PetDTO> searchByBreedAndColor(String breed, String color, String location, String status) {
+        return petRepository.searchMatchesManual(breed, color, location, status);
     }
 
-    //mostrar mascotas según su estado
-    public List<Pet> buscarPorEstado(String estado) {
-        List<Pet> todas = petRepository.findByEstadoIgnoreCase(estado);
-        return todas.stream()
-                .filter(p -> p.getEstado().equalsIgnoreCase(estado))
+    // Show pets by their status
+    public List<Pet> searchByStatus(String status) {
+        List<Pet> all = petRepository.findByStatusIgnoreCase(status);
+        return all.stream()
+                .filter(p -> p.getStatus().equalsIgnoreCase(status))
                 .collect(Collectors.toList());
     }
 }

@@ -1,4 +1,4 @@
-package com.babygoat.pet_service.security;
+package com.babygoat.pet_service.Security;
 
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;

@@ -3,7 +3,7 @@ package com.babygoat.match_service.Controller;
 import com.babygoat.match_service.DTO.MatchDTO;
 import com.babygoat.match_service.DTO.MatchResponseDTO;
 import com.babygoat.match_service.Service.MatchService;
-import com.babygoat.match_service.model.Match;
+import com.babygoat.match_service.Model.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

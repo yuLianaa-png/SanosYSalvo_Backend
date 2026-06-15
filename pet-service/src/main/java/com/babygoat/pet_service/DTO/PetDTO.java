@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PetDTO {
     private Long id;
-    private Long usuarioId; // Asegúrate de que coincida con el nombre en Match-Service
-    private String nombre;
-    private String raza;
+    private Long userId;
+    private String name;
+    private String breed;
     private String color;
-    private String estado;
-    private String ubicacion;
+    private String status;
+    private String location;
 }

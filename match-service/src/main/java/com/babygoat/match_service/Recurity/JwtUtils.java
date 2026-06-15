@@ -1,4 +1,4 @@
-package com.babygoat.match_service.security;
+package com.babygoat.match_service.Recurity;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

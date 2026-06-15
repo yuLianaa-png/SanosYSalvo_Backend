@@ -1,4 +1,4 @@
-package com.babygoat.auth_service.security;
+package com.babygoat.auth_service.Security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

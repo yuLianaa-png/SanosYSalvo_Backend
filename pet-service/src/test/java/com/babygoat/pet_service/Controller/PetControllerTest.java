@@ -1,4 +1,4 @@
-package com.babygoat.pet_service.controlador;
+package com.babygoat.pet_service.Controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -8,8 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 
+import com.babygoat.pet_service.Controller.petController;
 import com.babygoat.pet_service.DTO.PetDTO;
-import com.babygoat.pet_service.service.PetService;
+import com.babygoat.pet_service.Service.PetService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,18 +37,18 @@ class PetControllerTest {
 
     @Test
     void cuandoNoHayParametros_debeTratarComoNullYDevolver204() throws Exception {
-        when(petService.buscarPorRazaYColor(any(), any(), any(), any()))
+        when(petService.searchByBreedAndColor(any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/mascotas/buscar/match"))
                 .andExpect(status().isNoContent());
 
-        verify(petService).buscarPorRazaYColor(null, null, null, null);
+        verify(petService).searchByBreedAndColor(null, null, null, null);
     }
 
     @Test
     void normalizaParametros_y_llamaAlServicioConOrdenCorrecto() throws Exception {
-        when(petService.buscarPorRazaYColor(any(), any(), any(), any()))
+        when(petService.searchByBreedAndColor(any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/mascotas/buscar/match")
@@ -62,7 +63,7 @@ class PetControllerTest {
         ArgumentCaptor<String> capU = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> capE = ArgumentCaptor.forClass(String.class);
 
-        verify(petService).buscarPorRazaYColor(
+        verify(petService).searchByBreedAndColor(
                 capR.capture(), capC.capture(), capU.capture(), capE.capture());
 
         org.junit.jupiter.api.Assertions.assertEquals("Labrador", capR.getValue());

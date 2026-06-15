@@ -1,6 +1,6 @@
 package com.babygoat.match_service.DTO;
 
-import com.babygoat.match_service.model.Match;
+import com.babygoat.match_service.Model.Match;
 
 import java.util.List;
 

@@ -1,7 +1,8 @@
-package com.babygoat.pet_service.repository;
+package com.babygoat.pet_service.Repository;
 
 import com.babygoat.pet_service.DTO.PetDTO;
-import com.babygoat.pet_service.model.Pet;
+import com.babygoat.pet_service.Model.Pet;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,17 +12,17 @@ import java.util.List;
 
 @Repository
 public interface petRepository extends JpaRepository<Pet, Long> {
-    List<Pet> findByEstadoIgnoreCase(String estado);
+    List<Pet> findByStatusIgnoreCase(String status);
 
-    @Query("SELECT new com.babygoat.pet_service.DTO.PetDTO(p.id, p.usuarioId, p.nombre, p.raza, p.color, p.estado, p.ubicacion) FROM Pet p WHERE " +
-            "(:raza IS NULL OR LOWER(p.raza) = LOWER(:raza)) AND " +
+    @Query("SELECT new com.babygoat.pet_service.DTO.PetDTO(p.id, p.userId, p.name, p.breed, p.color, p.status, p.location) FROM Pet p WHERE " +
+            "(:breed IS NULL OR LOWER(p.breed) = LOWER(:breed)) AND " +
             "(:color IS NULL OR LOWER(p.color) = LOWER(:color)) AND " +
-            "(:ubicacion IS NULL OR LOWER(p.ubicacion) = LOWER(:ubicacion)) AND " +
-            "(:estado IS NULL OR LOWER(p.estado) = LOWER(:estado))")
-    List<PetDTO> buscarCoincidenciasManual(
-            @Param("raza") String raza,
+            "(:location IS NULL OR LOWER(p.location) = LOWER(:location)) AND " +
+            "(:status IS NULL OR LOWER(p.status) = LOWER(:status))")
+    List<PetDTO> searchMatchesManual(
+            @Param("breed") String breed,
             @Param("color") String color,
-            @Param("ubicacion") String ubicacion,
-            @Param("estado") String estado
+            @Param("location") String location,
+            @Param("status") String status
     );
 }

@@ -1,4 +1,4 @@
-package com.babygoat.match_service.model;
+package com.babygoat.match_service.Model;
 
 import jakarta.persistence.*;
 

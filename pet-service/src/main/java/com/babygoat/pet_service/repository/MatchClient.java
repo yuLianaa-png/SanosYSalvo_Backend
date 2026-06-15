@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "match-service", url = "http://sanos-salvos-match:8080", configuration = FeignConfig.class)
-public interface MatchCliente {
+public interface MatchClient {
     @PostMapping("/api/matches/create")
     void notifyNewMatch(@RequestBody MatchDTO dto);
 }

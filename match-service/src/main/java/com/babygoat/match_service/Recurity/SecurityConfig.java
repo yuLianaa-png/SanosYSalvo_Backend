@@ -1,4 +1,4 @@
-package com.babygoat.match_service.security;
+package com.babygoat.match_service.Recurity;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

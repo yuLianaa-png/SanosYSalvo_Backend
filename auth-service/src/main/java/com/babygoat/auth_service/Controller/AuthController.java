@@ -4,8 +4,9 @@ package com.babygoat.auth_service.Controller;
 
 import com.babygoat.auth_service.Model.User;
 import com.babygoat.auth_service.Repository.UserRepository;
+import com.babygoat.auth_service.Security.JwtUtils;
 import com.babygoat.auth_service.Service.AuthService;
-import com.babygoat.auth_service.security.JwtUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -4,10 +4,10 @@ import com.babygoat.match_service.DTO.MatchDTO;
 import com.babygoat.match_service.DTO.MatchResponseDTO;
 import com.babygoat.match_service.DTO.NotificationDTO;
 import com.babygoat.match_service.DTO.PetDTO;
-import com.babygoat.match_service.model.Match;
-import com.babygoat.match_service.repository.MatchRepository;
-import com.babygoat.match_service.repository.NotificationClient;
-import com.babygoat.match_service.repository.PetClient;
+import com.babygoat.match_service.Model.Match;
+import com.babygoat.match_service.Repository.MatchRepository;
+import com.babygoat.match_service.Repository.NotificationClient;
+import com.babygoat.match_service.Repository.PetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

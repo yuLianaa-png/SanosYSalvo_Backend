@@ -1,4 +1,4 @@
-package com.babygoat.pet_service.security;
+package com.babygoat.pet_service.Security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,8 +28,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
-            if (jwtUtils.validarToken(token)) {
-                String identity = jwtUtils.obtenerUsuarioDelToken(token);
+            if (jwtUtils.validateToken(token)) {
+                String identity = jwtUtils.getUsernameFromToken(token);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         identity,
                         null,

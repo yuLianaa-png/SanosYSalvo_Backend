@@ -1,4 +1,4 @@
-package com.babygoat.match_service.security;
+package com.babygoat.match_service.Recurity;
 
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;

@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 public class MatchDTO {
     private Long petId;
     private Long userId;
-    private String raza;
+    private String breed;
     private String color;
-    private String ubicacion;
-    private String estado;
+    private String location;
+    private String status;
 }

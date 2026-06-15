@@ -1,6 +1,6 @@
-package com.babygoat.match_service.repository;
+package com.babygoat.match_service.Repository;
 
-import com.babygoat.match_service.model.Match;
+import com.babygoat.match_service.Model.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
