@@ -1,16 +1,34 @@
 package com.babygoat.match_service.DTO;
 
 import com.babygoat.match_service.model.Match;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class MatchResponseDTO {
-    private Match matchCreado;
-    private List<petDTO> coincidencias;
+    private Match createdMatch;
+    private List<PetDTO> matches;
+
+    public MatchResponseDTO() {
+    }
+
+    public MatchResponseDTO(Match createdMatch, List<PetDTO> matches) {
+        this.createdMatch = createdMatch;
+        this.matches = matches;
+    }
+
+    public Match getCreatedMatch() {
+        return createdMatch;
+    }
+
+    public void setCreatedMatch(Match createdMatch) {
+        this.createdMatch = createdMatch;
+    }
+
+    public List<PetDTO> getMatches() {
+        return matches;
+    }
+
+    public void setMatches(List<PetDTO> matches) {
+        this.matches = matches;
+    }
 }
