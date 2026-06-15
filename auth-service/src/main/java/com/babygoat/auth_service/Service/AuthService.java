@@ -2,8 +2,8 @@
 
 package com.babygoat.auth_service.Service;
 
-import com.babygoat.auth_service.Model.Usuario;
-import com.babygoat.auth_service.Repository.UsuarioRepository;
+import com.babygoat.auth_service.Model.User;
+import com.babygoat.auth_service.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,19 +13,23 @@ import java.util.Optional;
 public class AuthService {
 
     @Autowired
-    private UsuarioRepository repository;
+    private UserRepository repository;
 
-    public Usuario registrar(Usuario usuario) {
-        return repository.save(usuario);
+    public User register(User user) {
+        return repository.save(user);
     }
 
-    public Optional<Usuario> validarLogin(String usuario, String contrasena) {
-        return repository.findByUsuario(usuario)
-                .filter(u -> u.getContrasena().equals(contrasena)); // Comparación simple
+    public Optional<User> validateLogin(String username, String password) {
+        return repository.findByUsername(username)
+                .filter(user -> user.getPassword().equals(password));
     }
 
-    public Usuario buscarPorUsuario(String nombreUsuario) {
-        return repository.findByUsuario(nombreUsuario)
+    public Optional<User> findByUsername(String username) {
+        return repository.findByUsername(username);
+    }
+
+    public User findByUsernameOrNull(String username) {
+        return repository.findByUsername(username)
                 .orElse(null);
     }
 }

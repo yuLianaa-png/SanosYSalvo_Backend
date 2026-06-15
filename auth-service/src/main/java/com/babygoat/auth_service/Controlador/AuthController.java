@@ -2,8 +2,8 @@
 
 package com.babygoat.auth_service.Controlador;
 
-import com.babygoat.auth_service.Model.Usuario;
-import com.babygoat.auth_service.Repository.UsuarioRepository;
+import com.babygoat.auth_service.Model.User;
+import com.babygoat.auth_service.Repository.UserRepository;
 import com.babygoat.auth_service.Service.AuthService;
 import com.babygoat.auth_service.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,50 +20,48 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     @Autowired
-    private UsuarioRepository repository;
+    private UserRepository repository;
     @Autowired
     private JwtUtils jwtUtils;
 
-    @PostMapping("/registrar")
-    public ResponseEntity<Usuario> register(@RequestBody Usuario usuario) {
-        return ResponseEntity.ok(authService.registrar(usuario));
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user) {
+        return ResponseEntity.ok(authService.register(user));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String usuario = credentials.get("usuario");
-        String contrasena = credentials.get("contrasena");
+        String username = credentials.get("username");
+        String password = credentials.get("password");
 
-        return authService.validarLogin(usuario, contrasena)
-                .map(u -> {
-                    String token = jwtUtils.generarToken(u.getUsuario()); // Usamos el nombre de usuario o email
+        return authService.validateLogin(username, password)
+                .map(user -> {
+                    String token = jwtUtils.generateToken(user.getUsername());
 
                     Map<String, Object> response = new HashMap<>();
                     response.put("token", token);
-                    response.put("usuario", u.getUsuario());
-                    response.put("mensaje", "Login exitoso");
+                    response.put("username", user.getUsername());
+                    response.put("message", "Login successful");
 
                     return ResponseEntity.ok(response);
                 })
                 .orElse(ResponseEntity.status(401).build());
     }
 
-    @GetMapping("/usuario/{id}")
-    public ResponseEntity<Usuario> obtenerPorId(@PathVariable Long id) {
+    @GetMapping("/user/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
 
-    @GetMapping("/buscar/{usuario}")
-    public ResponseEntity<Usuario> obtenerPorUsuario(@PathVariable String usuario) {
-        System.out.println("Buscando al usuario: " + usuario);
-
-        Usuario u = authService.buscarPorUsuario(usuario);
-        if (u == null) {
+    @GetMapping("/search/{username}")
+    public ResponseEntity<User> getByUsername(@PathVariable String username) {
+        User user = authService.findByUsernameOrNull(username);
+        if (user == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(u);
+        return ResponseEntity.ok(user);
     }
 }
