@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PetDTO {
-    private Long usuarioId;
+    private Long userId;
     private Long id;
-    private String raza;
+    private String breed;
     private String color;
-    private String estado; // "PERDIDA" o "ENCONTRADA"
-    private String ubicacion;
+    private String status; // "LOST" or "FOUND"
+    private String location;
 }

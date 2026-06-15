@@ -9,8 +9,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificacionDTO {
+public class NotificationDTO {
     private Long userId;
-    private String mensaje;
-    private List<PetDTO> sugerencias;
+    private String message;
+    private List<PetDTO> suggestions;
 }

@@ -11,19 +11,20 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notificacion {
+@Table(name = "notifications")
+public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
-    
-    private String mensaje;
 
-    @Column(name = "fecha_creacion")
-    private LocalDateTime fechaCreacion = LocalDateTime.now();
+    private String message;
 
-    @Column(name = "data_sugerencias", columnDefinition = "TEXT")
-    private String dataSugerencias;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "suggestions_data", columnDefinition = "TEXT")
+    private String suggestionsData;
 }
