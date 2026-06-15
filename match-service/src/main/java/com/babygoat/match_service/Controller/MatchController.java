@@ -1,4 +1,4 @@
-package com.babygoat.match_service.controlador;
+package com.babygoat.match_service.Controller;
 
 import com.babygoat.match_service.DTO.MatchDTO;
 import com.babygoat.match_service.DTO.MatchResponseDTO;

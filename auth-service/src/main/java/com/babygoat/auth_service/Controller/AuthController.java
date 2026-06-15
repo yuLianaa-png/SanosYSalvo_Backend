@@ -1,6 +1,6 @@
 //endpoint postman
 
-package com.babygoat.auth_service.Controlador;
+package com.babygoat.auth_service.Controller;
 
 import com.babygoat.auth_service.Model.User;
 import com.babygoat.auth_service.Repository.UserRepository;
