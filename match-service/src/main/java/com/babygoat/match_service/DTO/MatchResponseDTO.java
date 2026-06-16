@@ -6,12 +6,12 @@ import java.util.List;
 
 public class MatchResponseDTO {
     private Match createdMatch;
-    private List<PetDTO> matches;
+    private List<petDTO> matches;
 
     public MatchResponseDTO() {
     }
 
-    public MatchResponseDTO(Match createdMatch, List<PetDTO> matches) {
+    public MatchResponseDTO(Match createdMatch, List<petDTO> matches) {
         this.createdMatch = createdMatch;
         this.matches = matches;
     }
@@ -24,11 +24,11 @@ public class MatchResponseDTO {
         this.createdMatch = createdMatch;
     }
 
-    public List<PetDTO> getMatches() {
+    public List<petDTO> getMatches() {
         return matches;
     }
 
-    public void setMatches(List<PetDTO> matches) {
+    public void setMatches(List<petDTO> matches) {
         this.matches = matches;
     }
 }

@@ -3,7 +3,6 @@
 package com.babygoat.auth_service.Controller;
 
 import com.babygoat.auth_service.Model.User;
-import com.babygoat.auth_service.Repository.UserRepository;
 import com.babygoat.auth_service.Security.JwtUtils;
 import com.babygoat.auth_service.Service.AuthService;
 
@@ -20,8 +19,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    @Autowired
-    private UserRepository repository;
+
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -51,18 +49,19 @@ public class AuthController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
-        return repository.findById(id)
+        return authService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
     @GetMapping("/search/{username}")
     public ResponseEntity<User> getByUsername(@PathVariable String username) {
         User user = authService.findByUsernameOrNull(username);
+
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok(user);
     }
 }

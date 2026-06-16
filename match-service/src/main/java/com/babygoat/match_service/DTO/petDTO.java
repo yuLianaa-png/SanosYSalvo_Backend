@@ -1,6 +1,6 @@
 package com.babygoat.match_service.DTO;
 
-public class PetDTO {
+public class petDTO {
     private Long userId;
     private Long id;
     private String breed;
@@ -8,10 +8,10 @@ public class PetDTO {
     private String status;
     private String location;
 
-    public PetDTO() {
+    public petDTO() {
     }
 
-    public PetDTO(Long userId, Long id, String breed, String color, String status, String location) {
+    public petDTO(Long userId, Long id, String breed, String color, String status, String location) {
         this.userId = userId;
         this.id = id;
         this.breed = breed;

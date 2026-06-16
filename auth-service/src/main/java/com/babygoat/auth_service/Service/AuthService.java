@@ -4,6 +4,7 @@ package com.babygoat.auth_service.Service;
 
 import com.babygoat.auth_service.Model.User;
 import com.babygoat.auth_service.Repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,10 @@ public class AuthService {
 
     public Optional<User> findByUsername(String username) {
         return repository.findByUsername(username);
+    }
+
+    public Optional<User> findById(Long id) {
+        return repository.findById(id);
     }
 
     public User findByUsernameOrNull(String username) {

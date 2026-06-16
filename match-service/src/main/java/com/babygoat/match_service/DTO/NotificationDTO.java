@@ -5,7 +5,7 @@ import java.util.List;
 public class NotificationDTO {
     private Long userId;
     private String message;
-    private List<PetDTO> suggestions;
+    private List<petDTO> suggestions;
 
     public Long getUserId() {
         return userId;
@@ -23,11 +23,11 @@ public class NotificationDTO {
         this.message = message;
     }
 
-    public List<PetDTO> getSuggestions() {
+    public List<petDTO> getSuggestions() {
         return suggestions;
     }
 
-    public void setSuggestions(List<PetDTO> suggestions) {
+    public void setSuggestions(List<petDTO> suggestions) {
         this.suggestions = suggestions;
     }
 }

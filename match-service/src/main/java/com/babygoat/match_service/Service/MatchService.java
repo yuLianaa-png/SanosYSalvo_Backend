@@ -3,9 +3,9 @@ package com.babygoat.match_service.Service;
 import com.babygoat.match_service.DTO.MatchDTO;
 import com.babygoat.match_service.DTO.MatchResponseDTO;
 import com.babygoat.match_service.DTO.NotificationDTO;
-import com.babygoat.match_service.DTO.PetDTO;
+import com.babygoat.match_service.DTO.petDTO;
 import com.babygoat.match_service.Model.Match;
-import com.babygoat.match_service.Repository.MatchRepository;
+import com.babygoat.match_service.Repository.matchRepository;
 import com.babygoat.match_service.Repository.NotificationClient;
 import com.babygoat.match_service.Repository.PetClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 public class MatchService {
     @Autowired
-    private MatchRepository matchRepository;
+    private matchRepository matchRepository;
 
     @Autowired
     private NotificationClient notificationClient;
@@ -34,7 +34,7 @@ public class MatchService {
 
         String searchStatus = request.getStatus().equalsIgnoreCase("PERDIDA") ? "ENCONTRADA" : "PERDIDA";
 
-        List<PetDTO> matches = petClient.searchByFilters(
+        List<petDTO> matches = petClient.searchByFilters(
                 request.getBreed(),
                 request.getColor(),
                 request.getLocation(),
@@ -48,8 +48,8 @@ public class MatchService {
             currentUserNotification.setSuggestions(matches);
             notificationClient.sendNotification(currentUserNotification);
 
-            for (PetDTO match : matches) {
-                PetDTO currentPet = new PetDTO();
+            for (petDTO match : matches) {
+                petDTO currentPet = new petDTO();
                 currentPet.setId(request.getPetId());
                 currentPet.setBreed(request.getBreed());
                 currentPet.setColor(request.getColor());
