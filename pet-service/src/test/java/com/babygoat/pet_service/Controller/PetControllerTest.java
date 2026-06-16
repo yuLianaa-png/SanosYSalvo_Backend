@@ -32,7 +32,7 @@ class PetControllerTest {
     @BeforeEach
     void setUp() {
         // Inyectar el servicio mockeado en el controller
-        mockMvc = MockMvcBuilders.standaloneSetup(new petController(petService, null)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new petController(petService)).build();
     }
 
     @Test
@@ -40,7 +40,7 @@ class PetControllerTest {
         when(petService.searchByBreedAndColor(any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/mascotas/buscar/match"))
+        mockMvc.perform(get("/api/v1/mascotas/buscar/match"))
                 .andExpect(status().isNoContent());
 
         verify(petService).searchByBreedAndColor(null, null, null, null);
@@ -51,7 +51,7 @@ class PetControllerTest {
         when(petService.searchByBreedAndColor(any(), any(), any(), any()))
                 .thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/mascotas/buscar/match")
+        mockMvc.perform(get("/api/v1/mascotas/buscar/match")
                 .param("raza", "  Labrador  ")
                 .param("color", " Negro ")
                 .param("estado", " perdida ")
