@@ -66,7 +66,9 @@ public class PetService {
             matchClient.notifyNewMatch(dto);
 
         } catch (Exception e) {
-            System.err.println("Match service error: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error calling Match-Service: " + e.getMessage());
+            //System.err.println("Match service error: " + e.getMessage());
         }
     }
 

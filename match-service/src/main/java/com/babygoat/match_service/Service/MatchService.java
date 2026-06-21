@@ -5,15 +5,15 @@ import com.babygoat.match_service.DTO.MatchResponseDTO;
 import com.babygoat.match_service.DTO.NotificationDTO;
 import com.babygoat.match_service.DTO.petDTO;
 import com.babygoat.match_service.Model.Match;
-import com.babygoat.match_service.Repository.matchRepository;
 import com.babygoat.match_service.Repository.NotificationClient;
 import com.babygoat.match_service.Repository.PetClient;
+import com.babygoat.match_service.Repository.matchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList; 
 
 @Service
 public class MatchService {
@@ -39,8 +39,8 @@ public class MatchService {
         List<petDTO> matches = petClient.searchByFilters(
                 request.getBreed(),
                 request.getColor(),
-                request.getLocation(),
-                searchStatus
+                searchStatus,
+                request.getLocation()
         );
 
         // validar si matches es nulo o vacío antes de enviar notificaciones

@@ -17,8 +17,8 @@ public interface PetClient {
 
     @GetMapping("/api/v1/mascotas/search/matches")
     List<petDTO> searchByFilters(
-        @RequestParam("breed") String breed, 
-        @RequestParam("color") String color, 
-         @RequestParam("status") String status, 
-        @RequestParam("location") String location);
+            @RequestParam("breed") String breed,
+            @RequestParam("color") String color,
+            @RequestParam("status") String status,
+            @RequestParam("location") String location);
 }
