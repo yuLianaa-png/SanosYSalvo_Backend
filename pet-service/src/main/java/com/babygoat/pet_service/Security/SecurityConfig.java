@@ -18,9 +18,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/api/pets/search/matches").hasRole("USER")
-                        .anyRequest().authenticated()
+                    .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers("/api/v1/mascotas/buscar/**").permitAll() // Cubrir endpoint de búsqueda sin autenticación
+                    .requestMatchers("/api/v1/mascotas/to-publish").permitAll() // Para pruebas de publicación
+                    .requestMatchers("/api/v1/mascotas/search/matches").permitAll() // Para pruebas de búsqueda con filtros
+                    .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

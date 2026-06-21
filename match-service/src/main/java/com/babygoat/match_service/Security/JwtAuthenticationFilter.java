@@ -1,4 +1,4 @@
-package com.babygoat.match_service.Recurity;
+package com.babygoat.match_service.Security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

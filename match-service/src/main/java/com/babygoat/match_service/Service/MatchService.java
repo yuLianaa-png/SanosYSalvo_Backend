@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList; 
 
 @Service
 public class MatchService {
@@ -32,7 +33,8 @@ public class MatchService {
 
         Match savedMatch = matchRepository.save(newMatch);
 
-        String searchStatus = request.getStatus().equalsIgnoreCase("PERDIDA") ? "ENCONTRADA" : "PERDIDA";
+        // Estados ingleses para mantener consistencia con el pet-service
+        String searchStatus = request.getStatus().equalsIgnoreCase("LOST") ? "FOUND" : "LOST";
 
         List<petDTO> matches = petClient.searchByFilters(
                 request.getBreed(),
@@ -41,7 +43,8 @@ public class MatchService {
                 searchStatus
         );
 
-        if (!matches.isEmpty()) {
+        // validar si matches es nulo o vacío antes de enviar notificaciones
+        if (matches != null && !matches.isEmpty()) {
             NotificationDTO currentUserNotification = new NotificationDTO();
             currentUserNotification.setUserId(request.getUserId());
             currentUserNotification.setMessage("We found " + matches.size() + " possible matches for your pet!");
@@ -64,6 +67,9 @@ public class MatchService {
 
                 notificationClient.sendNotification(matchNotification);
             }
+        } else {
+            // vacío, lo inicializamos como una lista limpia para que el ResponseDTO no devuelva null
+            matches = new ArrayList<>();
         }
 
         return new MatchResponseDTO(savedMatch, matches);
