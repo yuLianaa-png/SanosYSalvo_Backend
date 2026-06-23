@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "pet-service", url = "http://sanos-salvos-petserv:8080", configuration = FeignConfig.class)
+@FeignClient(name = "pet-service", url = "${PET_SERVICE_URL:http://pet-service:8080}", configuration = FeignConfig.class)
 public interface PetClient {
     @GetMapping("/api/v1/mascotas/{id}")
     petDTO getPetById(@PathVariable("id") Long id);

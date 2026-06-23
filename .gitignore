@@ -32,5 +32,26 @@ build/
 ### VS Code ###
 .vscode/
 
-### PROD ###
+# Environment files
+.env
 .env.prod
+.env.local
+
+# AWS credentials / keys
+*.pem
+*.key
+.aws/
+
+# Java / Maven
+*.jar
+*.war
+
+# IDE
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

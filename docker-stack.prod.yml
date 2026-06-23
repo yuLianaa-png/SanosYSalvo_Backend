@@ -1,0 +1,189 @@
+version: "3.8"
+
+services:
+  # -------------------------------------------------------
+  # REVERSE PROXY INTERNO
+  # -------------------------------------------------------
+
+  nginx:
+    image: ${ECR_REGISTRY}/sanos-salvos-nginx:latest
+    ports:
+      - "80:80"
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  # -------------------------------------------------------
+  # BASES DE DATOS
+  # -------------------------------------------------------
+
+  auth-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${AUTH_DB}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  pet-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${PET_DB}
+      POSTGRES_USER: ${PET_DB_USER}
+      POSTGRES_PASSWORD: ${PET_DB_PASSWORD}
+    volumes:
+      - pet_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  match-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${MATCH_DB}
+      POSTGRES_USER: ${MATCH_DB_USER}
+      POSTGRES_PASSWORD: ${MATCH_DB_PASSWORD}
+    volumes:
+      - match_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  notification-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${NOTIF_DB}
+      POSTGRES_USER: ${NOTIF_DB_USER}
+      POSTGRES_PASSWORD: ${NOTIF_DB_PASSWORD}
+    volumes:
+      - notif_postgres_data:/var/lib/postgresql/data
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+
+  # -------------------------------------------------------
+  # MICROSERVICIOS
+  # -------------------------------------------------------
+
+  auth-service:
+    image: ${ECR_REGISTRY}/sanos-salvos-auth:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/${AUTH_DB}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  pet-service:
+    image: ${ECR_REGISTRY}/sanos-salvos-petserv:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pet-db:5432/${PET_DB}
+      SPRING_DATASOURCE_USERNAME: ${PET_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PET_DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      MATCH_SERVICE_URL: ${MATCH_SERVICE_URL}
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  match-service:
+    image: ${ECR_REGISTRY}/sanos-salvos-match:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://match-db:5432/${MATCH_DB}
+      SPRING_DATASOURCE_USERNAME: ${MATCH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MATCH_DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+
+      PET_SERVICE_URL: ${PET_SERVICE_URL}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  notification-service:
+    image: ${ECR_REGISTRY}/sanos-salvos-notif:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/${NOTIF_DB}
+      SPRING_DATASOURCE_USERNAME: ${NOTIF_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIF_DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    networks:
+      - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+# -------------------------------------------------------
+# REDES
+# -------------------------------------------------------
+
+networks:
+  pet-network:
+    driver: overlay
+    attachable: true
+
+# -------------------------------------------------------
+# VOLÚMENES
+# -------------------------------------------------------
+
+volumes:
+  auth_postgres_data:
+  pet_postgres_data:
+  match_postgres_data:
+  notif_postgres_data:

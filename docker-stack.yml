@@ -1,25 +1,30 @@
-services:
-  #BASES DE DATOS DE LOS MICROSERVICIOS ----------------------------------------
+version: "3.8"
 
-  #Base de datps para auth-service
+services:
+  # BASES DE DATOS ------------------------------------------------------
+
   auth-db:
     image: postgres:15
-    container_name: auth-db
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: user_auth
       POSTGRES_PASSWORD: auth_password
     ports:
-      - "5434:5432" # Puerto diferente para que puedas entrar desde fuera con DBeaver/PgAdmin
+      - "5434:5432"
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
     networks:
       - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
 
-  #Base de datos para pet-services
   pet-db:
     image: postgres:15
-    container_name: pet-db
     environment:
       POSTGRES_DB: pet_db
       POSTGRES_USER: user_pet
@@ -30,11 +35,16 @@ services:
       - pet_postgres_data:/var/lib/postgresql/data
     networks:
       - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
 
-  #Base de datos para match-service
   match-db:
     image: postgres:15
-    container_name: match-db
     environment:
       POSTGRES_DB: match_db
       POSTGRES_USER: user_match
@@ -45,11 +55,16 @@ services:
       - match_postgres_data:/var/lib/postgresql/data
     networks:
       - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
 
-  #Base de datos para notification-service
   notification-db:
     image: postgres:15
-    container_name: notification-db
     environment:
       POSTGRES_DB: notification_db
       POSTGRES_USER: user_notif
@@ -60,56 +75,18 @@ services:
       - notif_postgres_data:/var/lib/postgresql/data
     networks:
       - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
 
-  #--------------------------------------------------------------------------------------------------
+  # MICROSERVICIOS ------------------------------------------------------
 
-  #MICROSERVICIOS------------------------------------------------------------------------------------
-  # Microservicio de pet service
-  pet-service:
-    build: ./pet-service
-    container_name: sanos-salvos-petserv
-    ports:
-      - "8081:8080"
-    depends_on:
-      - pet-db
-    environment:
-      # Se usa el nombre del servicio 'sys-db' como host
-      SPRING_DATASOURCE_URL: jdbc:postgresql://pet-db:5432/pet_db
-      SPRING_DATASOURCE_USERNAME: user_pet
-      SPRING_DATASOURCE_PASSWORD: pet_password
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      MATCH_SERVICE_URL: http://match-service:8080
-      AUTH_SERVICE_URL: http://auth-service:8080
-    networks:
-      - pet-network
-
-  # Microservicio de matching
-  match-service:
-    build: ./match-service
-    container_name: sanos-salvos-match
-    ports:
-      - "8082:8080"
-    depends_on:
-      pet-service:
-        condition: service_started
-      auth-service:
-        condition: service_started
-    environment:
-      # Configuración necesaria para que Feign encuentre al otro servicio
-      SPRING_DATASOURCE_URL: jdbc:postgresql://match-db:5432/match_db
-      SPRING_DATASOURCE_USERNAME: user_match
-      SPRING_DATASOURCE_PASSWORD: match_password
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      PET_SERVICE_URL: http://pet-service:8080
-      AUTH_SERVICE_URL: http://auth-service:8080
-      NOTIFICATION_SERVICE_URL: http://notification-service:8080
-    networks:
-      - pet-network
-
-  #Microservicio de auth
   auth-service:
-    build: ./auth-service
-    container_name: sanos-salvos-auth
+    image: sanos-salvos-auth:latest
     ports:
       - "8083:8080"
     environment:
@@ -117,19 +94,62 @@ services:
       SPRING_DATASOURCE_USERNAME: user_auth
       SPRING_DATASOURCE_PASSWORD: auth_password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-    depends_on:
-      - auth-db
     networks:
       - pet-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
 
-  #Microservicio de Notificaciones
+  pet-service:
+    image: sanos-salvos-petserv:latest
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pet-db:5432/pet_db
+      SPRING_DATASOURCE_USERNAME: user_pet
+      SPRING_DATASOURCE_PASSWORD: pet_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      AUTH_SERVICE_URL: http://auth-service:8080
+      MATCH_SERVICE_URL: http://match-service:8080
+    networks:
+      - pet-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  match-service:
+    image: sanos-salvos-match:latest
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://match-db:5432/match_db
+      SPRING_DATASOURCE_USERNAME: user_match
+      SPRING_DATASOURCE_PASSWORD: match_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      PET_SERVICE_URL: http://pet-service:8080
+      AUTH_SERVICE_URL: http://auth-service:8080
+      NOTIFICATION_SERVICE_URL: http://notification-service:8080
+    networks:
+      - pet-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
   notification-service:
-    build: ./notification-service
-    container_name: sanos-salvos-notif
+    image: sanos-salvos-notif:latest
     ports:
       - "8084:8080"
-    depends_on:
-      - notification-db
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_db
       SPRING_DATASOURCE_USERNAME: user_notif
@@ -137,11 +157,21 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     networks:
       - pet-network
-#----------------------------------------------------------------------------------------------------
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+
+  # REDES ------------------------------------------------------
 
 networks:
   pet-network:
-    driver: bridge
+    driver: overlay
+    attachable: true
+
+# VOLÚMENES ------------------------------------------------------
 
 volumes:
   auth_postgres_data:
