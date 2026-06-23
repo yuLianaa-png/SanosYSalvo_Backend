@@ -4,6 +4,7 @@ import com.babygoat.notification_service.DTO.NotificationDTO;
 import com.babygoat.notification_service.Model.Notification;
 import com.babygoat.notification_service.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,5 +25,21 @@ public class NotificationController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Notification>> getByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getNotifications(userId));
+    }
+
+    @PostMapping("/internal/match")
+    public ResponseEntity<?> createInternalMatchNotification(
+            @RequestHeader(value = "X-Internal-Secret", required = false) String internalSecret,
+            @RequestBody NotificationDTO notificationDTO
+    ) {
+        String expectedSecret = System.getenv("INTERNAL_SERVICE_SECRET");
+
+        if (expectedSecret == null || !expectedSecret.equals(internalSecret)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid internal secret");
+        }
+
+        notificationService.saveNotification(notificationDTO);
+
+        return ResponseEntity.ok("Notification created");
     }
 }
