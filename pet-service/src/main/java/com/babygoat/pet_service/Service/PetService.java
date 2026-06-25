@@ -8,6 +8,7 @@ import com.babygoat.pet_service.Repository.AuthClient;
 import com.babygoat.pet_service.Repository.MatchClient;
 import com.babygoat.pet_service.Repository.petRepository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public class PetService {
     private final petRepository petRepository;
     private final MatchClient matchClient;
     private final AuthClient authClient;
+
+    @Value("${INTERNAL_SERVICE_SECRET}")
+    private String internalServiceSecret;
 
     public PetService(petRepository petRepository,
                       MatchClient matchClient,
@@ -63,7 +67,7 @@ public class PetService {
             dto.setLocation(pet.getLocation());
             dto.setStatus(pet.getStatus());
 
-            matchClient.notifyNewMatch(dto);
+            matchClient.notifyNewMatch(internalServiceSecret, dto);
 
         } catch (Exception e) {
             e.printStackTrace();

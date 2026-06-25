@@ -26,16 +26,20 @@ public class MatchService {
     @Autowired
     private PetClient petClient;
 
+    @Autowired
+    private SqsNotificationPublisher sqsNotificationPublisher;
+
     public MatchResponseDTO createValidatedMatch(MatchDTO request) {
+
         Match newMatch = new Match();
         newMatch.setPetId(request.getPetId());
         newMatch.setUserId(request.getUserId());
 
         Match savedMatch = matchRepository.save(newMatch);
 
+
         // Estados ingleses para mantener consistencia con el pet-service
         String searchStatus = request.getStatus().equalsIgnoreCase("LOST") ? "FOUND" : "LOST";
-
         List<petDTO> matches = petClient.searchByFilters(
                 request.getBreed(),
                 request.getColor(),
@@ -43,13 +47,17 @@ public class MatchService {
                 request.getLocation()
         );
 
+
         // validar si matches es nulo o vacío antes de enviar notificaciones
         if (matches != null && !matches.isEmpty()) {
+            List<NotificationDTO> notificationsToSend = new ArrayList<>();
             NotificationDTO currentUserNotification = new NotificationDTO();
             currentUserNotification.setUserId(request.getUserId());
             currentUserNotification.setMessage("We found " + matches.size() + " possible matches for your pet!");
             currentUserNotification.setSuggestions(matches);
-            notificationClient.sendNotification(currentUserNotification);
+
+            notificationsToSend.add(currentUserNotification);
+            //notificationClient.sendNotification(currentUserNotification);
 
             for (petDTO match : matches) {
                 petDTO currentPet = new petDTO();
@@ -65,8 +73,11 @@ public class MatchService {
                 matchNotification.setMessage("Someone posted a pet that matches yours (" + request.getBreed() + ").");
                 matchNotification.setSuggestions(Collections.singletonList(currentPet));
 
-                notificationClient.sendNotification(matchNotification);
+                notificationsToSend.add(matchNotification);
+                //notificationClient.sendNotification(matchNotification);
             }
+            sqsNotificationPublisher.publishNotifications(notificationsToSend);
+
         } else {
             // vacío, lo inicializamos como una lista limpia para que el ResponseDTO no devuelva null
             matches = new ArrayList<>();
