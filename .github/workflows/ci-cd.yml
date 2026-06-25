@@ -1,4 +1,4 @@
-name: CI/CD AWS Docker Swarm
+name: CI/CD AWS
 
 on:
   push:
@@ -103,6 +103,14 @@ jobs:
             ProxyJump bastion
             StrictHostKeyChecking no
           EOF
+      - name: Test SSH connectivity to bastion
+        run: |
+          echo "Testing TCP connection to bastion port 22..."
+          timeout 15 bash -c "</dev/tcp/${{ secrets.BASTION_IP }}/22" && echo "Port 22 reachable" || echo "Port 22 NOT reachable"
+
+          echo "Testing SSH connection to bastion..."
+          ssh -vvv bastion "echo 'SSH to bastion OK'"    
+
 
       - name: Deploy services in EC2 manager
         run: |
