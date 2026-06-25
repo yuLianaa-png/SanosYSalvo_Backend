@@ -25,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        if (path.equals("/api/notifications/internal/match")) {
+        if (path.equals("/api/notifications/internal/match") || path.equals("/actuator/health")) {
             filterChain.doFilter(request, response);
             return;
         }
