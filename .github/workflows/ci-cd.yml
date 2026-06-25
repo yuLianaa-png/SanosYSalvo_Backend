@@ -3,7 +3,7 @@ name: CI/CD AWS Docker Swarm
 on:
   push:
     branches:
-      - main
+      - ci-cd
   workflow_dispatch:
 
 env:
