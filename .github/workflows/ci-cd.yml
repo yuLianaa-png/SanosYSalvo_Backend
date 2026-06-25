@@ -151,6 +151,8 @@ jobs:
             docker service update \
               --with-registry-auth \
               --image "$ECR_REGISTRY/sanos-salvos-notif:$IMAGE_TAG" \
+              --env-add AUTH_SERVICE_URL=http://auth-service:8080 \
+              --env-add INTERNAL_SERVICE_SECRET=una_clave_super_secreta_interna_para_lambda \
               sanos_notification-service
           
             docker service update \
