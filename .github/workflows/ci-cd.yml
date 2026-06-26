@@ -80,13 +80,13 @@ jobs:
         env:
           AWS_REGION: us-east-1
           SQS_QUEUE_NAME: match-notifications-queue
-          LAMBDA_FUNCTION_NAME: process-match-notification
+          LAMBDA_FUNCTION_NAME: process-match-notifications
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           INTERNAL_SERVICE_SECRET: ${{ secrets.INTERNAL_SERVICE_SECRET }}
         run: |
           chmod +x cloud/aws/setup-sqs-lambda.sh
           cloud/aws/setup-sqs-lambda.sh
-  
+
   deploy:
     name: Deploy to Docker Swarm
     runs-on: ubuntu-latest
