@@ -67,7 +67,8 @@ echo "Lambda function exists."
 
 echo "Packaging Lambda source code..."
 
-TMP_ZIP="$(mktemp -t lambda-package.XXXXXX.zip)"
+TMP_DIR="$(mktemp -d)"
+TMP_ZIP="$TMP_DIR/lambda-package.zip"
 
 (
   cd "$LAMBDA_SOURCE_DIR"
