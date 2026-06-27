@@ -246,11 +246,12 @@ SanosYSalvo_Backend/
 
 ### Pet-Service
 
-| Método | Endpoint                          | Descripción                                     |
-|--------|-----------------------------------|-------------------------------------------------|
-| `POST` | `/api/v1/mascotas`                | Registro de mascota perdida o encontrada        |
-| `GET`  | `/api/v1/mascotas/{id}`           | Consulta de mascota por ID                      |
-| `GET`  | `/api/v1/mascotas/search/matches` | Búsqueda interna de mascotas para coincidencias |
+| Método   | Endpoint                          | Descripción                                     |
+|----------|-----------------------------------|-------------------------------------------------|
+| `POST`   | `/api/v1/mascotas`                | Registro de mascota perdida o encontrada        |
+| `GET`    | `/api/v1/mascotas/{id}`           | Consulta de mascota por ID                      |
+| `GET`    | `/api/v1/mascotas/search/matches` | Búsqueda interna de mascotas para coincidencias |
+| `DELETE` | `/api/v1/mascotas/{id}`           | Eliminar mascota por id                         |
 
 ---
 
